@@ -14,6 +14,7 @@
 
 ;; Avoid garbage collection during startup.
 ;; see `SPC h . dotspacemacs-gc-cons' for more info
+
 (setq gc-cons-threshold 402653184 gc-cons-percentage 0.6)
 (load-file (concat (file-name-directory load-file-name)
                    "core/core-versions.el"))
@@ -36,3 +37,8 @@
     (when dotspacemacs-enable-server
       (require 'server)
       (unless (server-running-p) (server-start)))))
+
+(add-to-load-path "~/.config/.spacemacs/")
+
+(require 'xah-math-input)
+(global-set-key (kbd "S-SPC") 'xah-math-input-change-to-symbol)
