@@ -139,7 +139,7 @@ If the universal prefix argument is used then kill also the window."
   (spacemacs/symbol-highlight-transient-state/body)
   (spacemacs/integrate-evil-search nil))
 
-(defun spacemacs//ahs-ms-on-exit ()
+(defun spacemacs//ahs-ts-on-exit ()
   ;; Restore user search direction state as ahs has exitted in a state
   ;; good for <C-s>, but not for 'n' and 'N'"
   (setq isearch-forward spacemacs--ahs-searching-forward))
@@ -194,8 +194,7 @@ If the universal prefix argument is used then kill also the window."
   (spacemacs//transient-state-make-doc
    'symbol-highlight
    (format spacemacs--symbol-highlight-transient-state-doc
-           (spacemacs//symbol-highlight-doc)
-           (make-string (length (spacemacs//symbol-highlight-doc)) 32))))
+           (spacemacs//symbol-highlight-doc))))
 
 
 ;; golden ratio

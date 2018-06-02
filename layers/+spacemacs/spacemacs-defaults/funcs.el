@@ -559,6 +559,13 @@ in a split window to the right."
   (split-window-horizontally)
   (other-window 1))
 
+(defun spacemacs/layout-grid ()
+  " Set the layout to a 2x2 grid. "
+  (interactive)
+  (delete-other-windows)
+  (split-window (split-window-right) nil 'below)
+  (split-window-below))
+
 (defun spacemacs/layout-triple-columns ()
   " Set the layout to triple columns. "
   (interactive)
@@ -571,6 +578,11 @@ in a split window to the right."
   (interactive)
   (delete-other-windows)
   (split-window-right))
+
+(defun spacemacs/layout-single-column ()
+  " Set the layout to single column. "
+  (interactive)
+  (delete-other-windows))
 
 (defun spacemacs/insert-line-above-no-indent (count)
   "Insert a new line above with no indentation."
@@ -1019,7 +1031,7 @@ using a visual block/rectangle selection."
   (interactive "r")
   (let (words
         alist_words_compare
-        (formated "")
+        (formatted "")
         (overview (call-interactively 'count-words)))
     (save-excursion
       (goto-char start)
@@ -1044,12 +1056,12 @@ Compare them on count first,and in case of tie sort them alphabetically."
       (let* ((word (pop words))
              (name (car word))
              (count (cdr word)))
-        (setq formated (concat formated (format "[%s: %d], " name count)))))
+        (setq formatted (concat formatted (format "[%s: %d], " name count)))))
     (when (interactive-p)
-      (if (> (length formated) 2)
+      (if (> (length formatted) 2)
           (message (format "%s\nWord count: %s"
                            overview
-                           (substring formated 0 -2)))
+                           (substring formatted 0 -2)))
         (message "No words.")))
     words))
 
@@ -1161,10 +1173,17 @@ if prefix argument ARG is given, switch to it in an other, possibly new window."
   "Return non-nil if line numbers should be enabled for current buffer.
 Decision is based on `dotspacemacs-line-numbers'."
   (and dotspacemacs-line-numbers
-       (spacemacs//linum-current-buffer-is-not-special)
        (spacemacs//linum-curent-buffer-is-not-too-big)
        (or (spacemacs//linum-backward-compabitility)
-           (spacemacs//linum-enabled-for-current-major-mode))))
+           (and (listp dotspacemacs-line-numbers)
+                (spacemacs//linum-enabled-for-current-major-mode)))))
+
+(defun spacemacs/relative-line-numbers-p ()
+  "Return non-nil if line numbers should be relative.
+Decision is based on `dotspacemacs-line-numbers'."
+  (or (eq dotspacemacs-line-numbers 'relative)
+      (and (listp dotspacemacs-line-numbers)
+           (car (spacemacs/mplist-get dotspacemacs-line-numbers :relative)))))
 
 (defun spacemacs//linum-on (origfunc &rest args)
   "Advice function to improve `linum-on' function."
@@ -1192,11 +1211,8 @@ Decision is based on `dotspacemacs-line-numbers'."
   (and dotspacemacs-line-numbers
        (not (listp dotspacemacs-line-numbers))
        (or (eq dotspacemacs-line-numbers t)
-           (eq dotspacemacs-line-numbers 'relative))))
-
-(defun spacemacs//linum-current-buffer-is-not-special ()
-  "Return non-nil if current buffer is not a special buffer."
-  (not (string-match-p "\\*.*\\*" (buffer-name))))
+           (eq dotspacemacs-line-numbers 'relative))
+       (derived-mode-p 'prog-mode 'text-mode)))
 
 (defun spacemacs//linum-curent-buffer-is-not-too-big ()
   "Return non-nil if buffer size is not too big."
@@ -1206,31 +1222,35 @@ Decision is based on `dotspacemacs-line-numbers'."
                (* 1000 (car (spacemacs/mplist-get dotspacemacs-line-numbers
                                                   :size-limit-kb)))))))
 
-;; mode in :enabled, not in :disabled ==> t
-;; mode not in :enabled, in :disabled ==> nil
-;; mode in :enabled, parent in :disabled ==> t
-;; parent in :enabled, mode in :disabled ==> nil
-;; not in :enabled, not in :disabled, :enabled is empty ==> t
-;; not in :enabled, not in :disabled, :enabled is not empty ==> nil
-;; both :enabled and :disabled are empty ==> t
+;; see tests in tests/layers/+distribution/spacemacs-base/line-numbers-utest.el
+;; for the different possible cases
 (defun spacemacs//linum-enabled-for-current-major-mode ()
   "Return non-nil if line number is enabled for current major-mode."
-  (let* ((enabled-for-modes (spacemacs/mplist-get dotspacemacs-line-numbers
-                                                  :enabled-for-modes))
+  ;; default `enabled-for-modes' to '(prog-mode text-mode), because it is a more
+  ;; sensible default than enabling in all buffers - including Magit buffers,
+  ;; terminal buffers, etc.
+  (let* ((user-enabled-for-modes (spacemacs/mplist-get dotspacemacs-line-numbers
+                                                       :enabled-for-modes))
+         (enabled-for-modes (or user-enabled-for-modes '(prog-mode text-mode)))
          (disabled-for-modes (spacemacs/mplist-get dotspacemacs-line-numbers
                                                    :disabled-for-modes))
-         (enabled-for-parent (apply #'derived-mode-p enabled-for-modes))
+         (enabled-for-parent (or (and (equal enabled-for-modes '(all)) 'all)
+                                 (apply #'derived-mode-p enabled-for-modes)))
          (disabled-for-parent (apply #'derived-mode-p disabled-for-modes)))
     (or
+     ;; special case 'all: enable for any mode that isn't specifically disabled
+     (and (eq enabled-for-parent 'all) (not disabled-for-parent))
      ;; current mode or a parent is in :enabled-for-modes, and there isn't a
      ;; more specific parent (or the mode itself) in :disabled-for-modes
      (and enabled-for-parent
-          ;; handles the case where current major-mode has a parent both in
-          ;; :enabled-for-modes and in :disabled-for-modes. Return non-nil if
-          ;; enabled-for-parent is the more specific parent (IOW doesn't derive
-          ;; from disabled-for-parent)
-          (not (spacemacs/derived-mode-p enabled-for-parent disabled-for-parent)))
-     ;; current mode (or parent) not explicitly disabled, and :enabled-for-modes
-     ;; not explicitly specified by user (meaning if it isn't explicitly
-     ;; disabled then it's enabled)
-     (and (null enabled-for-modes) (not disabled-for-parent)))))
+          (or (not disabled-for-parent)
+              ;; handles the case where current major-mode has a parent both in
+              ;; :enabled-for-modes and in :disabled-for-modes. Return non-nil
+              ;; if enabled-for-parent is the more specific parent (IOW derives
+              ;; from disabled-for-parent)
+              (spacemacs/derived-mode-p enabled-for-parent disabled-for-parent)))
+     ;; current mode (or parent) not explicitly disabled
+     (and (null user-enabled-for-modes)
+          enabled-for-parent            ; mode is one of default allowed modes
+          disabled-for-modes
+          (not disabled-for-parent)))))
