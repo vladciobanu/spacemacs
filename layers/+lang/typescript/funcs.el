@@ -66,8 +66,6 @@
   "Setup lsp backend."
   (if (configuration-layer/layer-used-p 'lsp)
       (progn
-        (spacemacs//setup-lsp-jump-handler 'typescript-mode
-                                    'typescript-tsx-mode)
         (lsp-javascript-typescript-enable))
     (message (concat "`lsp' layer is not installed, "
                      "please add `lsp' layer to your dotfile."))))
@@ -76,14 +74,14 @@
   "Setup lsp auto-completion."
   (if (configuration-layer/layer-used-p 'lsp)
       (progn
-        (fix-lsp-company-prefix)
         (spacemacs|add-company-backends
           :backends company-lsp
           :modes typescript-mode typescript-tsx-mode
           :variables company-minimum-prefix-length 2
           :append-hooks nil
           :call-hooks t)
-        (company-mode))
+        (company-mode)
+        (fix-lsp-company-prefix))
     (message (concat "`lsp' layer is not installed, "
                      "please add `lsp' layer to your dotfile."))))
 
@@ -135,8 +133,10 @@
     (call-interactively 'spacemacs/typescript-tsfmt-format-buffer))
    ((eq typescript-fmt-tool 'tide)
     (call-interactively 'tide-format))
+   ((eq typescript-fmt-tool 'prettier)
+    (call-interactively 'prettier-js))
    (t (error (concat "%s isn't valid typescript-fmt-tool value."
-                     " It should be 'tide or 'typescript-formatter."
+                     " It should be 'tide, 'typescript-formatter or 'prettier."
                      (symbol-name typescript-fmt-tool))))))
 
 (defun spacemacs/typescript-fmt-before-save-hook ()
@@ -150,3 +150,10 @@
                  (list (point-min) (point-max))))
   (browse-url (concat "http://www.typescriptlang.org/Playground#src="
                       (url-hexify-string (buffer-substring-no-properties start end)))))
+
+(defun spacemacs/typescript-yasnippet-setup ()
+  (yas-activate-extra-mode 'js-mode))
+
+(defun spacemacs/typescript-jump-to-type-def ()
+  (interactive)
+  (tide-jump-to-definition t))

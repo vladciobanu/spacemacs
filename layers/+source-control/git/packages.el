@@ -16,10 +16,12 @@
         gitattributes-mode
         gitconfig-mode
         gitignore-mode
+        gitignore-templates
         git-commit
         git-link
         git-messenger
         git-timemachine
+        (helm-git-grep :requires helm)
         (helm-gitignore :requires helm)
         magit
         magit-gitflow
@@ -44,6 +46,13 @@
 
 (defun git/post-init-fill-column-indicator ()
   (add-hook 'git-commit-mode-hook 'fci-mode))
+
+(defun git/init-helm-git-grep ()
+  (use-package helm-git-grep
+    :defer t
+    :init (spacemacs/set-leader-keys
+            "g/" 'helm-git-grep
+            "g*" 'helm-git-grep-at-point)))
 
 (defun git/init-helm-gitignore ()
   (use-package helm-gitignore
@@ -113,6 +122,15 @@
 (defun git/init-gitignore-mode ()
   (use-package gitignore-mode
     :defer t))
+
+(defun git/init-gitignore-templates ()
+  (use-package gitignore-templates
+    :defer t
+    :init
+    (spacemacs/set-leader-keys-for-major-mode 'gitignore-mode
+      "i" 'gitignore-templates-insert)
+    (spacemacs/set-leader-keys
+      "gfi" 'gitignore-templates-new-file)))
 
 (defun git/init-magit ()
   (use-package magit

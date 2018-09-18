@@ -37,6 +37,7 @@
         (ox-reveal :toggle org-enable-reveal-js-support)
         persp-mode
         (ox-hugo :toggle org-enable-hugo-support)
+        (org-trello :toggle org-enable-trello-support)
         ))
 
 (defun org/post-init-company ()
@@ -63,10 +64,7 @@
     (spacemacs|hide-lighter evil-org-mode)))
 
 (defun org/post-init-evil-surround ()
-  (defun spacemacs/add-org-surrounds ()
-    (push '(?: . spacemacs//surround-drawer) evil-surround-pairs-alist)
-    (push '(?# . spacemacs//surround-code) evil-surround-pairs-alist))
-  (add-hook 'org-mode-hook 'spacemacs/add-org-surrounds))
+  (add-hook 'org-mode-hook 'spacemacs/org-setup-evil-surround))
 
 (defun org/init-gnuplot ()
   (use-package gnuplot
@@ -163,8 +161,10 @@ Will work on both org-mode and any mode that accepts plain html."
                         ("mC" . "clocks")
                         ("md" . "dates")
                         ("me" . "export")
+                        ("mf" . "feeds")
                         ("mi" . "insert")
                         ("miD" . "download")
+                        ("mm" . "more")
                         ("ms" . "trees/subtrees")
                         ("mT" . "toggles")
                         ("mt" . "tables")
@@ -186,6 +186,8 @@ Will work on both org-mode and any mode that accepts plain html."
         "dt" 'org-time-stamp
         "dT" 'org-time-stamp-inactive
         "ee" 'org-export-dispatch
+        "fi" 'org-feed-goto-inbox
+        "fu" 'org-feed-update-all
 
         "a" 'org-agenda
 
@@ -310,6 +312,7 @@ Will work on both org-mode and any mode that accepts plain html."
       ;; Add global evil-leader mappings. Used to access org-agenda
       ;; functionalities – and a few others commands – from any other mode.
       (spacemacs/declare-prefix "ao" "org")
+      (spacemacs/declare-prefix "aof" "feeds")
       (spacemacs/declare-prefix "aok" "clock")
       (spacemacs/set-leader-keys
         ;; org-agenda
@@ -318,6 +321,8 @@ Will work on both org-mode and any mode that accepts plain html."
         "aoa" 'org-agenda-list
         "aoc" 'org-capture
         "aoe" 'org-store-agenda-views
+        "aofi" 'org-feed-goto-inbox
+        "aofu" 'org-feed-update-all
         "aokg" 'org-clock-goto
         "aoki" 'org-clock-in-last
         "aokj" 'org-clock-jump-to-current-clock
@@ -661,3 +666,22 @@ Headline^^            Visit entry^^               Filter^^                    Da
 
 (defun org/init-ox-hugo ()
   (use-package ox-hugo :after ox))
+
+(defun org/init-org-trello ()
+  (use-package org-trello
+    :after org
+    :config
+    (progn
+      (spacemacs/declare-prefix-for-mode 'org-mode "mmt" "trello")
+      (spacemacs/declare-prefix-for-mode 'org-mode "mmtd" "sync down")
+      (spacemacs/declare-prefix-for-mode 'org-mode "mmtu" "sync up")
+      (spacemacs/set-leader-keys-for-major-mode 'org-mode
+        "mtI" 'org-trello-install-key-and-token
+        "mta" 'org-trello-archive-card
+        "mtc" 'org-trello-create-board-and-install-metadata
+        "mti" 'org-trello-install-board-metadata
+        "mtm" 'org-trello-update-board-metadata
+        "mtdb" 'spacemacs/org-trello-pull-buffer
+        "mtdc" 'spacemacs/org-trello-pull-card
+        "mtub" 'spacemacs/org-trello-push-buffer
+        "mtuc" 'spacemacs/org-trello-push-card))))

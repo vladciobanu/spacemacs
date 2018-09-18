@@ -31,9 +31,10 @@ This layers adds extensive support for [[http://git-scm.com/][git]] to Spacemacs
 ** Features:
 - git repository management the indispensable [[http://magit.vc/][magit]] package
 - [[https://github.com/jtatarik/magit-gitflow][git-flow]] add-on for magit.
-- quick in buffer history browsing with [[https://github.com/pidu/git-timemachine][git-timemachine]].
+- quick in buffer history browsing with [[https://melpa.org/#/git-timemachine][git-timemachine]].
 - quick in buffer last commit message per line with [[https://github.com/syohex/emacs-git-messenger][git-messenger]]
 - colorize buffer line by age of commit with [[https://github.com/syohex/emacs-smeargle][smeargle]]
+- git grep with [[https://github.com/yasuyk/helm-git-grep][helm-git-grep]]
 - gitignore generator with [[https://github.com/jupl/helm-gitignore][helm-gitignore]]
 - org integration with magit via [[https://github.com/magit/orgit][orgit]]
 
@@ -112,6 +113,8 @@ Git commands (start with ~g~):
 
 | Key Binding | Description                                         |
 |-------------+-----------------------------------------------------|
+| ~SPC g /~   | open =helm-git-grep=                                |
+| ~SPC g *~   | open =helm-git-grep-at-point=                       |
 | ~SPC g b~   | open a =magit= blame                                |
 | ~SPC g f f~ | view a file at a specific branch or commit          |
 | ~SPC g f l~ | commits log for current file                        |
@@ -131,7 +134,7 @@ Git commands (start with ~g~):
 
 - Highlight by age of commit or last update time is provided by
  [[https://github.com/syohex/emacs-smeargle][smeargle]].
-- Git time machine is provided by [[https://github.com/pidu/git-timemachine][git-timemachine]].
+- Git time machine is provided by [[https://melpa.org/#/git-timemachine][git-timemachine]].
 - Git last commit message per line is provided by [[https://github.com/syohex/emacs-git-messenger][git-messenger]].
 
 ** Magit
@@ -249,7 +252,7 @@ will discard the commit message.
 | ~%~         | open magit-gitflow menu |
 
 ** Git time machine
-[[https://github.com/pidu/git-timemachine][git-timemachine]] allows to quickly browse the commits of the current buffer.
+[[https://melpa.org/#/git-timemachine][git-timemachine]] allows to quickly browse the commits of the current buffer.
 
 | Key Binding | Description                                        |
 |-------------+----------------------------------------------------|

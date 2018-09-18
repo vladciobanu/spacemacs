@@ -15,10 +15,12 @@
         company
         eldoc
         flycheck
+        lsp-javascript-typescript
         smartparens
         tide
         typescript-mode
         web-mode
+        yasnippet
         ))
 
 (defun typescript/post-init-add-node-modules-path ()
@@ -39,8 +41,13 @@
   (spacemacs/enable-flycheck 'typescript-mode)
   (spacemacs/enable-flycheck 'typescript-tsx-mode)
   (with-eval-after-load 'tide
-    (flycheck-add-mode 'typescript-tide 'typescript-tsx-mode))
-  (flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode))
+    (with-eval-after-load 'flycheck
+      (flycheck-add-mode 'typescript-tide 'typescript-tsx-mode)
+      (flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode))))
+
+(defun typescript/post-init-lsp-javascript-typescript ()
+  (spacemacs//setup-lsp-jump-handler 'typescript-mode
+                                     'typescript-tsx-mode))
 
 (defun typescript/post-init-smartparens ()
   (if dotspacemacs-smartparens-strict-mode
@@ -71,8 +78,10 @@
       (spacemacs/declare-prefix-for-mode 'typescript-tsx-mode "ms" "send")
 
       (setq keybindingList '("Ee" tide-fix
+                             "Ed" tide-add-tslint-disable-next-line
                              "gb" tide-jump-back
-                             "gt" typescript/jump-to-type-def
+                             "gg" tide-jump-to-definition
+                             "gt" spacemacs/typescript-jump-to-type-def
                              "gu" tide-references
                              "hh" tide-documentation-at-point
                              "rr" tide-rename-symbol
@@ -87,6 +96,10 @@
 (defun typescript/post-init-web-mode ()
   (define-derived-mode typescript-tsx-mode web-mode "TypeScript-tsx")
   (add-to-list 'auto-mode-alist '("\\.tsx\\'" . typescript-tsx-mode)))
+
+(defun typescript/post-init-yasnippet ()
+  (spacemacs/add-to-hooks #'spacemacs/typescript-yasnippet-setup '(typescript-mode-hook
+                                                     typescript-tsx-mode-hook)))
 
 (defun typescript/init-typescript-mode ()
   (use-package typescript-mode

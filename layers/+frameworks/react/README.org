@@ -34,6 +34,7 @@ React layer uses the same backend defined in javascript layer. Options are =tern
 
 To use the on-the-fly syntax checking, install =eslint= with babel and react
 support:
+
 #+BEGIN_SRC sh
   $ npm install -g eslint babel-eslint eslint-plugin-react
 #+END_SRC
@@ -42,20 +43,25 @@ If your project do not use a custom =.eslintrc= file I strongly advice you to
 try out this one by Airbnb:
 [[https://github.com/airbnb/javascript/blob/master/linters/.eslintrc][.eslintrc]]
 
-In order to use automatic code formatting you need to install ~js-beautify~
+React layer uses the same formatter defined in javascript layer. Options are
+=web-beautify= and =prettier=.
+To use automatic code formatting you need to install ~js-beautify~ or ~prettier~
 with:
+
 #+BEGIN_SRC sh
-  $ npm install -g js-beautify
+  $ npm install -g js-beautify prettier
 #+END_SRC
 
 If you install these in non-standard locations, then add the following to your
 =dotspacemacs/user-init= function:
+
 #+BEGIN_SRC elisp
   (add-to-list 'exec-path "/path/to/node/bins" t)
 #+END_SRC
 
 Be sure to have the ~e4x~ option set to ~true~ on your ~.jsbeautifyrc~ here it
 is my configuration as an example:
+
 #+BEGIN_SRC json
   {
     "indent_size": 2,
@@ -78,7 +84,8 @@ is my configuration as an example:
     "wrap_attributes": "auto",
     "wrap_attributes_indent_size": 2,
     "e4x": true,
-    "end_with_newline": true
+    "end_with_newline": true,
+    "brace_style": "collapse-preserve-inline"
   }
 #+END_SRC
 
@@ -103,6 +110,7 @@ may use these settings:
 
 And if you want to have 2 space indent also for element's attributes,
 concatenations and contiguous function calls:
+
 #+begin_src emacs-lisp
   (with-eval-after-load 'web-mode
     (add-to-list 'web-mode-indentation-params '("lineup-args" . nil))

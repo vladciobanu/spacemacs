@@ -28,6 +28,7 @@
                                        ("fC"  "files/convert")
                                        ("fe"  "emacs(spacemacs)")
                                        ("fv"  "variables")
+                                       ("fy"  "yank path")
                                        ("F"   "frame")
                                        ("g"   "git/versions-control")
                                        ("h"   "help")
@@ -137,6 +138,7 @@
   "b N j" 'spacemacs/new-empty-buffer-below
   "b N k" 'spacemacs/new-empty-buffer-above
   "b N l" 'spacemacs/new-empty-buffer-right
+  "b N f" 'spacemacs/new-empty-buffer-new-frame
   "b N n" 'spacemacs/new-empty-buffer
   "bP"    'spacemacs/copy-clipboard-to-whole-buffer
   "bp"    'previous-buffer
@@ -198,16 +200,21 @@
   :evil-leader "e.")
 ;; file -----------------------------------------------------------------------
 (spacemacs/set-leader-keys
+  "fA" 'spacemacs/find-file-and-replace-buffer
   "fc" 'spacemacs/copy-file
   "fD" 'spacemacs/delete-current-buffer-file
   "fei" 'spacemacs/find-user-init-file
   "fed" 'spacemacs/find-dotfile
   "feD" 'spacemacs/ediff-dotfile-and-template
+  "fee" 'spacemacs/edit-env
+  "feE" 'dotspacemacs/call-user-env
+  "fe C-e" 'spacemacs/force-init-spacemacs-env
   "feR" 'dotspacemacs/sync-configuration-layers
   "fev" 'spacemacs/display-and-copy-version
   "feU"  'configuration-layer/update-packages
   "fCd" 'spacemacs/unix2dos
   "fCu" 'spacemacs/dos2unix
+  "fi" 'spacemacs/insert-file
   "fg" 'rgrep
   "fl" 'find-file-literally
   "fE" 'spacemacs/sudo-edit
@@ -218,16 +225,21 @@
   "fvd" 'add-dir-local-variable
   "fvf" 'add-file-local-variable
   "fvp" 'add-file-local-variable-prop-line
-  "fy" 'spacemacs/show-and-copy-buffer-filename)
+  "fyc" 'spacemacs/copy-file-path-with-line-column
+  "fyd" 'spacemacs/copy-directory-path
+  "fyl" 'spacemacs/copy-file-path-with-line
+  "fyn" 'spacemacs/copy-file-name
+  "fyN" 'spacemacs/copy-file-name-base
+  "fyy" 'spacemacs/copy-file-path)
 ;; frame ----------------------------------------------------------------------
 (spacemacs/set-leader-keys
-  "Ff" 'find-file-other-frame
+  "Ff" 'spacemacs/find-file-other-frame
   "Fd" 'delete-frame
   "FD" 'delete-other-frames
-  "Fb" 'switch-to-buffer-other-frame
-  "FB" 'display-buffer-other-frame
+  "Fb" 'spacemacs/switch-to-buffer-other-frame
+  "FB" 'spacemacs/display-buffer-other-frame
   "Fo" 'other-frame
-  "FO" 'dired-other-frame
+  "FO" 'spacemacs/dired-other-frame
   "Fn" 'make-frame)
 ;; help -----------------------------------------------------------------------
 (spacemacs/set-leader-keys
@@ -359,6 +371,26 @@
   :mode font-lock-mode
   :documentation "Toggle syntax highlighting."
   :evil-leader "ths")
+(spacemacs|add-toggle zero-based-column-indexing
+  :documentation "Toggle column indexing starting at 0 versus 1.
+
+This is achieved by the built in functionality available in emacs 26 by changing
+the value of the `column-number-indicator-zero-based' variable. Functionality
+that does not take into acount `column-number-indicator-zero-based' will not
+respond to this toggle."
+  :status (bound-and-true-p column-number-indicator-zero-based)
+  :on (setq column-number-indicator-zero-based t)
+  :off (setq column-number-indicator-zero-based nil)
+  :on-message (concat
+                "Column indexing starts at 0 (current column is "
+                (number-to-string (current-column))
+                ")")
+  :off-message (concat
+                 "Column indexing starts at 1 (current column is "
+                 (number-to-string (1+ (current-column)))
+                 ")")
+  :evil-leader "tz")
+
 (spacemacs|add-toggle transparent-frame
   :status nil
   :on (spacemacs/toggle-transparency)
@@ -492,6 +524,7 @@
   "xlS" 'spacemacs/sort-lines-reverse
   "xlu" 'spacemacs/uniquify-lines
   "xtc" 'transpose-chars
+  "xte" 'transpose-sexps
   "xtl" 'transpose-lines
   "xtp" 'transpose-paragraphs
   "xts" 'transpose-sentences
